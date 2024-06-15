@@ -1,23 +1,20 @@
-####
-FROM golang:alpine AS builder
-RUN apk update && apk add --no-cache git make bash
-WORKDIR $GOPATH/src/csi-rclone-nodeplugin
+# syntax=docker/dockerfile:1
+
+FROM golang:1.22 AS build-stage
+ARG GITHUB_REF=latest
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN make plugin
 
-####
-FROM alpine:3.16
-RUN apk add --no-cache ca-certificates bash fuse3 curl unzip tini
+ENV CGO_ENABLED=0
 
-RUN curl https://rclone.org/install.sh | bash
+RUN go build -a -gcflags=-trimpath=$(go env GOPATH) -asmflags=-trimpath=$(go env GOPATH) -ldflags '-X github.com/wunderio/csi-rclone/pkg/rclone.DriverVersion=${GITHUB_REF} -extldflags "-static"' -o /bin/csi-rclone-plugin ./cmd/csi-rclone-plugin
 
-# Use pre-compiled version (with cirectory marker patch)
-# https://github.com/rclone/rclone/pull/5323
-# COPY bin/rclone /usr/bin/rclone
-# RUN chmod 755 /usr/bin/rclone \
-#     && chown root:root /usr/bin/rclone
-
-COPY --from=builder /go/src/csi-rclone-nodeplugin/_output/csi-rclone-plugin /bin/csi-rclone-plugin
-
-ENTRYPOINT [ "/sbin/tini", "--"]
+# Deploy the application binary into a lean image
+FROM rclone/rclone:1.67.0
+WORKDIR /
+COPY --from=build-stage /bin/csi-rclone-plugin /bin/csi-rclone-plugin
 CMD ["/bin/csi-rclone-plugin"]
