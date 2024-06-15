@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 	"github.com/spf13/cobra"
 	"github.com/wunderio/csi-rclone/pkg/rclone"
+	"os"
 )
 
 var (
@@ -22,7 +22,7 @@ func main() {
 	flag.CommandLine.Parse([]string{})
 
 	cmd := &cobra.Command{
-		Use:   "rclone",
+		Use:   "csi-rclone-plugin",
 		Short: "CSI based rclone driver",
 		Run: func(cmd *cobra.Command, args []string) {
 			handle()

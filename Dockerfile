@@ -17,4 +17,5 @@ RUN go build -a -gcflags=-trimpath=$(go env GOPATH) -asmflags=-trimpath=$(go env
 FROM rclone/rclone:1.67.0
 WORKDIR /
 COPY --from=build-stage /bin/csi-rclone-plugin /bin/csi-rclone-plugin
-CMD ["/bin/csi-rclone-plugin"]
+ENTRYPOINT ["/bin/csi-rclone-plugin"]
+CMD []
