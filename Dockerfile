@@ -11,7 +11,7 @@ COPY . .
 
 ENV CGO_ENABLED=0
 
-RUN go build -a -gcflags=-trimpath=$(go env GOPATH) -asmflags=-trimpath=$(go env GOPATH) -ldflags '-X github.com/wunderio/csi-rclone/pkg/rclone.DriverVersion=${GITHUB_REF} -extldflags "-static"' -o /bin/csi-rclone-plugin ./cmd/csi-rclone-plugin
+RUN go build -a -gcflags=-trimpath=$(go env GOPATH) -asmflags=-trimpath=$(go env GOPATH) -ldflags "-X github.com/wunderio/csi-rclone/pkg/rclone.DriverVersion=${GITHUB_REF} -extldflags '-static'" -o /bin/csi-rclone-plugin ./cmd/csi-rclone-plugin
 
 # Deploy the application binary into a lean image
 FROM rclone/rclone:1.67.0
